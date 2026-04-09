@@ -1,4 +1,11 @@
 require("dotenv").config();
+
+console.log("=== ENV DEBUG ===");
+console.log("EMAILJS_SERVICE:", process.env.EMAILJS_SERVICE);
+console.log("EMAILJS_TEMPLATE:", process.env.EMAILJS_TEMPLATE);
+console.log("EMAILJS_KEY:", process.env.EMAILJS_KEY);
+console.log("=================");
+require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const https = require("https");
