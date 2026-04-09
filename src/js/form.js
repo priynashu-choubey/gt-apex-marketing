@@ -1,94 +1,161 @@
-// form.js — form validation + Supabase + EmailJS submission
+// form.js — form validation, Supabase lead capture, email notification
 
-function validateEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
+function initForm() {
+  const form = document.getElementById("contactForm");
+  const errorBanner = document.getElementById("errorBanner");
+  const successMsg = document.getElementById("successMsg");
+  const btn = document.getElementById("submitBtn");
 
-function setFieldError(inputId, errId, hasError) {
-  const input = document.getElementById(inputId);
-  const err   = document.getElementById(errId);
-  if (!input || !err) return !hasError;
-  input.classList.toggle('error', hasError);
-  err.classList.toggle('visible', hasError);
-  return !hasError;
-}
+  if (!form) return; // guard: contact page not yet in DOM
 
-function validateForm() {
-  const firstName = document.getElementById('firstName')?.value.trim();
-  const lastName  = document.getElementById('lastName')?.value.trim();
-  const email     = document.getElementById('email')?.value.trim();
-  const company   = document.getElementById('company')?.value.trim();
-
-  let valid = true;
-  valid = setFieldError('firstName', 'firstNameErr', !firstName)  && valid;
-  valid = setFieldError('lastName',  'lastNameErr',  !lastName)   && valid;
-  valid = setFieldError('email',     'emailErr',     !validateEmail(email)) && valid;
-  valid = setFieldError('company',   'companyErr',   !company)    && valid;
-  return valid;
-}
-
-function clearErrorOnInput(ids) {
-  ids.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('input', () => el.classList.remove('error'));
-  });
-}
-
-async function handleSubmit(e) {
-  e.preventDefault();
-  if (!validateForm()) return;
-
-  const btn         = document.getElementById('submitBtn');
-  const errorBanner = document.getElementById('errorBanner');
-  errorBanner.classList.remove('visible');
-
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Sending...';
-
-  const data = {
-    first_name: document.getElementById('firstName').value.trim(),
-    last_name:  document.getElementById('lastName').value.trim(),
-    email:      document.getElementById('email').value.trim(),
-    company:    document.getElementById('company').value.trim(),
-    service:    document.getElementById('service').value,
-    message:    document.getElementById('message').value.trim(),
+  // ── FIELD REFS ──
+  const fields = {
+    firstName: document.getElementById("firstName"),
+    lastName: document.getElementById("lastName"),
+    email: document.getElementById("email"),
+    company: document.getElementById("company"),
+    service: document.getElementById("service"),
+    message: document.getElementById("message"),
   };
 
-  try {
-    // 1. Save lead to Supabase
-    const { error: dbError } = await window.db.from('leads').insert([data]);
-    if (dbError) throw new Error('DB error: ' + dbError.message);
+  const errors = {
+    firstName: document.getElementById("firstNameErr"),
+    lastName: document.getElementById("lastNameErr"),
+    email: document.getElementById("emailErr"),
+    company: document.getElementById("companyErr"),
+  };
 
-    // 2. Send email notification via EmailJS
-    await emailjs.send(
-      window.APP_CONFIG.emailjsService,
-      window.APP_CONFIG.emailjsTemplate,
-      {
-        first_name: data.first_name,
-        last_name:  data.last_name,
-        from_email: data.email,
-        company:    data.company,
-        service:    data.service,
-        message:    data.message || 'No message provided.',
-      }
-    );
-
-    // 3. Show success state
-    document.getElementById('contactForm').style.display = 'none';
-    document.getElementById('successMsg').classList.add('visible');
-
-  } catch (err) {
-    console.error('Submission failed:', err);
-    errorBanner.classList.add('visible');
-    btn.disabled = false;
-    btn.innerHTML = "Send it — we'll respond within 24hrs →";
+  // ── HELPERS ──
+  function isValidEmail(val) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
   }
-}
 
-// Called by main.js after contact page renders
-function initForm() {
-  const form = document.getElementById('contactForm');
-  if (!form) return;
-  form.addEventListener('submit', handleSubmit);
-  clearErrorOnInput(['firstName', 'lastName', 'email', 'company']);
+  function setError(key, msg) {
+    if (!errors[key]) return;
+    fields[key].classList.add("error");
+    errors[key].textContent = msg;
+    errors[key].classList.add("visible");
+  }
+
+  function clearError(key) {
+    if (!errors[key]) return;
+    fields[key].classList.remove("error");
+    errors[key].classList.remove("visible");
+  }
+
+  function clearAllErrors() {
+    Object.keys(errors).forEach(clearError);
+    errorBanner.classList.remove("visible");
+  }
+
+  // ── INLINE VALIDATION (on blur) ──
+  fields.firstName.addEventListener("blur", () => {
+    if (!fields.firstName.value.trim()) {
+      setError("firstName", "Please enter your first name");
+    } else {
+      clearError("firstName");
+    }
+  });
+
+  fields.lastName.addEventListener("blur", () => {
+    if (!fields.lastName.value.trim()) {
+      setError("lastName", "Please enter your last name");
+    } else {
+      clearError("lastName");
+    }
+  });
+
+  fields.email.addEventListener("blur", () => {
+    if (!isValidEmail(fields.email.value)) {
+      setError("email", "Please enter a valid email address");
+    } else {
+      clearError("email");
+    }
+  });
+
+  fields.company.addEventListener("blur", () => {
+    if (!fields.company.value.trim()) {
+      setError("company", "Please enter your company name");
+    } else {
+      clearError("company");
+    }
+  });
+
+  // ── HONEYPOT (anti-spam hidden field) ──
+  // The contact.js template must include:
+  // <input type="text" id="honeypot" name="honeypot" style="display:none" tabindex="-1" autocomplete="off">
+  const honeypot = document.getElementById("honeypot");
+
+  // ── SUBMIT ──
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearAllErrors();
+
+    // Bot check
+    if (honeypot && honeypot.value) return;
+
+    // Validate
+    let valid = true;
+
+    if (!fields.firstName.value.trim()) {
+      setError("firstName", "Please enter your first name");
+      valid = false;
+    }
+    if (!fields.lastName.value.trim()) {
+      setError("lastName", "Please enter your last name");
+      valid = false;
+    }
+    if (!isValidEmail(fields.email.value)) {
+      setError("email", "Please enter a valid email address");
+      valid = false;
+    }
+    if (!fields.company.value.trim()) {
+      setError("company", "Please enter your company name");
+      valid = false;
+    }
+
+    if (!valid) return;
+
+    // Build data object
+    const data = {
+      first_name: fields.firstName.value.trim(),
+      last_name: fields.lastName.value.trim(),
+      email: fields.email.value.trim().toLowerCase(),
+      company: fields.company.value.trim(),
+      service: fields.service.value,
+      message: fields.message.value.trim() || null,
+    };
+
+    // Loading state
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Sending…';
+
+    try {
+      // 1. Save lead to Supabase
+      const { error: dbError } = await window.db.from("leads").insert([data]);
+
+      if (dbError) throw new Error("DB error: " + dbError.message);
+
+      // 2. Send email notification via server (keeps EmailJS key off the browser)
+      try {
+        await fetch("/api/send-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+      } catch (emailErr) {
+        // Email failure is non-fatal — lead is already saved
+        console.warn("Email notification failed:", emailErr);
+      }
+
+      // 3. Show success
+      form.style.display = "none";
+      successMsg.classList.add("visible");
+    } catch (err) {
+      console.error("Submission failed:", err);
+      errorBanner.classList.add("visible");
+      btn.disabled = false;
+      btn.innerHTML = "Send it — we'll respond within 24hrs →";
+    }
+  });
 }
