@@ -26,7 +26,7 @@ app.get("/api/config", (req, res) => {
 app.post("/api/send-email", async (req, res) => {
   const { first_name, last_name, email, company, service, message } = req.body;
 
-  // Basic server-side validation
+  // ✅ Strong validation
   if (!first_name || !last_name || !email || !company) {
     return res.status(400).json({ error: "Missing required fields" });
   }
@@ -34,7 +34,7 @@ app.post("/api/send-email", async (req, res) => {
   const payload = JSON.stringify({
     service_id: process.env.EMAILJS_SERVICE,
     template_id: process.env.EMAILJS_TEMPLATE,
-    user_id: process.env.EMAILJS_KEY,
+    public_key: process.env.EMAILJS_KEY, // ✅ FIXED
     template_params: {
       first_name,
       last_name,
@@ -56,22 +56,36 @@ app.post("/api/send-email", async (req, res) => {
   };
 
   const emailReq = https.request(options, (emailRes) => {
-    if (emailRes.statusCode === 200) {
-      res.json({ ok: true });
-    } else {
-      res.status(emailRes.statusCode).json({ error: "EmailJS error" });
-    }
+    let data = "";
+
+    // ✅ capture full response
+    emailRes.on("data", (chunk) => {
+      data += chunk;
+    });
+
+    emailRes.on("end", () => {
+      console.log("📩 EmailJS status:", emailRes.statusCode);
+      console.log("📩 EmailJS response:", data);
+
+      if (emailRes.statusCode === 200) {
+        return res.json({ ok: true });
+      } else {
+        return res.status(emailRes.statusCode).json({
+          error: "EmailJS failed",
+          details: data, // ✅ now you see real error
+        });
+      }
+    });
   });
 
   emailReq.on("error", (err) => {
-    console.error("EmailJS request failed:", err);
-    res.status(500).json({ error: "Email send failed" });
+    console.error("❌ EmailJS request failed:", err);
+    return res.status(500).json({ error: "Email send failed" });
   });
 
   emailReq.write(payload);
   emailReq.end();
 });
-
 // ── SPA fallback ──
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "src", "index.html"));

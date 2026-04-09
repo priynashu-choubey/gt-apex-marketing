@@ -113,7 +113,9 @@ function initForm() {
       setError("company", "Please enter your company name");
       valid = false;
     }
-
+    if (!fields.message.value.trim()) {
+      fields.message.value = ""; // ensure empty string, never null
+    }
     if (!valid) return;
 
     // Build data object

@@ -13,48 +13,58 @@ function contact() {
         <div class="error-banner" id="errorBanner">⚠ Something went wrong. Please try again or email us directly.</div>
 
         <form id="contactForm" novalidate>
+
+          <!-- Honeypot — hidden from real users, catches bots -->
+          <input type="text" id="honeypot" name="honeypot" style="display:none" tabindex="-1" autocomplete="off" />
+
           <div class="form-row">
             <div class="form-group">
               <label>First Name *</label>
-              <input type="text" id="firstName" placeholder="Rajan" />
+              <input type="text" id="firstName" placeholder="Rajan" autocomplete="given-name" />
               <span class="field-error" id="firstNameErr">Please enter your first name</span>
             </div>
             <div class="form-group">
               <label>Last Name *</label>
-              <input type="text" id="lastName" placeholder="Mehta" />
+              <input type="text" id="lastName" placeholder="Mehta" autocomplete="family-name" />
               <span class="field-error" id="lastNameErr">Please enter your last name</span>
             </div>
           </div>
+
           <div class="form-group">
             <label>Work Email *</label>
-            <input type="email" id="email" placeholder="rajan@yourbrand.com" />
+            <input type="email" id="email" placeholder="rajan@yourbrand.com" autocomplete="email" />
             <span class="field-error" id="emailErr">Please enter a valid email address</span>
           </div>
+
           <div class="form-group">
             <label>Company / Brand *</label>
-            <input type="text" id="company" placeholder="Brand name" />
+            <input type="text" id="company" placeholder="Brand name" autocomplete="organization" />
             <span class="field-error" id="companyErr">Please enter your company name</span>
           </div>
+
           <div class="form-group">
             <label>What do you need?</label>
             <select id="service">
-              <option>360° Full-Service Marketing</option>
-              <option>Brand Strategy & Identity</option>
-              <option>Performance Marketing (Paid Ads)</option>
-              <option>SEO & Content</option>
-              <option>Social Media Management</option>
-              <option>Website & Digital Infrastructure</option>
-              <option>Analytics & Attribution</option>
-              <option>Not sure yet — let's talk</option>
+              <option value="360-full-service">360° Full-Service Marketing</option>
+              <option value="brand-strategy">Brand Strategy &amp; Identity</option>
+              <option value="performance-marketing">Performance Marketing (Paid Ads)</option>
+              <option value="seo-content">SEO &amp; Content</option>
+              <option value="social-media">Social Media Management</option>
+              <option value="website-infrastructure">Website &amp; Digital Infrastructure</option>
+              <option value="analytics-attribution">Analytics &amp; Attribution</option>
+              <option value="not-sure">Not sure yet — let's talk</option>
             </select>
           </div>
+
           <div class="form-group">
             <label>Tell us about your challenge</label>
             <textarea id="message" placeholder="What's the current bottleneck? What does winning look like for you?"></textarea>
           </div>
+
           <button type="submit" class="form-submit" id="submitBtn">
             Send it — we'll respond within 24hrs →
           </button>
+
         </form>
 
         <div class="success-message" id="successMsg">
