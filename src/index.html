@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GT Apex Marketing — Full Throttle Digital</title>
+    <meta name="description" content="360° digital marketing agency. Full-throttle strategy, performance marketing, social, SEO, content and more." />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,900;1,300;1,400;1,700&family=Barlow+Condensed:wght@400;600;700;900&display=swap" rel="stylesheet" />
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- EmailJS -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body>
+
+    <div class="cursor-dot" id="cursorDot"></div>
+    <div class="cursor-ring" id="cursorRing"></div>
+
+    <!-- NAV -->
+    <nav>
+      <div class="nav-logo">GT<span class="accent">APEX</span></div>
+      <ul class="nav-links">
+        <li><a onclick="showPage('home')">Home</a></li>
+        <li><a onclick="showPage('services')">Services</a></li>
+        <li><a onclick="showPage('about')">About</a></li>
+        <li><a onclick="showPage('contact')" class="nav-cta">Work with us</a></li>
+      </ul>
+    </nav>
+
+    <!-- PAGES (injected by JS) -->
+    <div id="app"></div>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="footer-top">
+        <div>
+          <div class="footer-brand">GT<span class="accent">APEX</span> MARKETING</div>
+          <div class="footer-tagline">Full-throttle 360° marketing for brands that don't settle for second place.</div>
+        </div>
+        <div class="footer-col">
+          <h5>Pages</h5>
+          <a onclick="showPage('home')">Home</a>
+          <a onclick="showPage('about')">About</a>
+          <a onclick="showPage('contact')">Contact</a>
+        </div>
+        <div class="footer-col">
+          <h5>Services</h5>
+          <a onclick="showPage('services')">Strategy & Branding</a>
+          <a onclick="showPage('services')">Search & Performance</a>
+          <a onclick="showPage('services')">Social & Engagement</a>
+          <a onclick="showPage('services')">Content & Creative</a>
+        </div>
+        <div class="footer-col">
+          <h5>Get Started</h5>
+          <a onclick="showPage('contact')">Free Brand Audit</a>
+          <a href="mailto:hello@gtapex.in">hello@gtapex.in</a>
+          <a onclick="showPage('services')">View all services</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2025 GT Apex Marketing. All rights reserved.</span>
+        <span>Built for brands that refuse to idle.</span>
+      </div>
+    </footer>
+
+    <!-- JS Modules -->
+    <script src="/js/config.js"></script>
+    <script src="/js/pages/home.js"></script>
+    <script src="/js/pages/services.js"></script>
+    <script src="/js/pages/about.js"></script>
+    <script src="/js/pages/contact.js"></script>
+    <script src="/js/form.js"></script>
+    <script src="/js/main.js"></script>
+  </body>
+</html>
